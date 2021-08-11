@@ -193,7 +193,7 @@ joinToLength n xs = filter (\str -> length str == n) [x ++ y | x <- xs, y <- xs]
 --
 -- Give +|+ a type signature. NB: It needs to be of the form (+|+) :: x,
 -- with the parentheses because +|+ is an infix operator.
---
+--0
 -- Examples:
 --   [1,2,3] +|+ [4,5,6]  ==> [1,4]
 --   [] +|+ [True]        ==> [True]
@@ -256,8 +256,9 @@ multiCompose = foldr (.) id
 --   multiApp reverse [tail, take 2, reverse] "foo" ==> ["oof","fo","oo"]
 --   multiApp concat [take 3, reverse] "race" ==> "racecar"
 
-multiApp :: a -> [a -> b] -> c -> d
-multiApp f gs x = todo
+
+multiApp :: ([b] -> t) -> [a -> b] -> a -> t
+multiApp f gs x = f (map ($ x) gs)
 
 ------------------------------------------------------------------------------
 -- Ex 14: in this exercise you get to implement an interpreter for a
@@ -293,6 +294,12 @@ multiApp f gs x = todo
 
  
 interpreter :: [String] -> [String]
-interpreter commands 
-    | commands == ["up"] = ["1","2"]
-    | otherwise = []
+interpreter commands = exec commands 0 0
+    where
+        exec [] x y = []
+        exec ("up" : xs) x y = exec xs x (y+1)
+        exec ("down" : xs) x y = exec xs x (y-1)
+        exec ("right" : xs) x y = exec xs (x+1) y
+        exec ("left" : xs) x y = exec xs (x-1) y
+        exec ("printY" : xs) x y = show y : exec xs x y
+        exec ("printX" : xs) x y = show x : exec xs x y
